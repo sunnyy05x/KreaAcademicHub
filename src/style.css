@@ -181,6 +181,7 @@ ol {
   display: flex;
   align-items: center;
   justify-content: flex-start;
+  transform-style: preserve-3d;
 }
 
 .topbar-logo {
@@ -192,29 +193,32 @@ ol {
   width: 100%;
   height: auto;
   transform-style: preserve-3d;
-  animation: float3d 5s ease-in-out infinite;
+  backface-visibility: hidden;
+  -webkit-backface-visibility: hidden;
+  will-change: transform;
+  animation: float3d 6s ease-in-out infinite;
   filter: drop-shadow(0 4px 12px rgba(99, 102, 241, 0.3));
 }
 
 @keyframes float3d {
   0% {
-    transform: translateY(0px) rotateX(0deg) rotateY(0deg) scale(1);
+    transform: translateY(0px) rotateX(0deg) rotateY(0deg);
   }
 
   25% {
-    transform: translateY(-4px) rotateX(5deg) rotateY(8deg) scale(1.02);
+    transform: translateY(-3px) rotateX(4deg) rotateY(6deg);
   }
 
   50% {
-    transform: translateY(0px) rotateX(0deg) rotateY(15deg) scale(1.05);
+    transform: translateY(0px) rotateX(0deg) rotateY(10deg);
   }
 
   75% {
-    transform: translateY(4px) rotateX(-5deg) rotateY(8deg) scale(1.02);
+    transform: translateY(3px) rotateX(-4deg) rotateY(6deg);
   }
 
   100% {
-    transform: translateY(0px) rotateX(0deg) rotateY(0deg) scale(1);
+    transform: translateY(0px) rotateX(0deg) rotateY(0deg);
   }
 }
 
