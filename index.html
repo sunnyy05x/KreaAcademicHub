@@ -1,0 +1,79 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Krea Academic Hub — Scheduler · Help Desk · Peer Network</title>
+  <meta name="description"
+    content="Krea Academic Hub: Book office hours, solve doubts, and find peer tutors — all in one place." />
+  <link rel="preconnect" href="https://fonts.googleapis.com" />
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+  <link
+    href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&family=Outfit:wght@400;500;600;700;800&display=swap"
+    rel="stylesheet" />
+  <link rel="icon" type="image/svg+xml"
+    href="data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 32 32'><text y='28' font-size='28'>🎓</text></svg>" />
+  <link rel="stylesheet" href="/src/style.css" />
+</head>
+
+<body>
+  <div id="app">
+    <!-- Sidebar -->
+    <aside class="sidebar" id="sidebar">
+      <div class="sidebar-brand">
+        <div class="brand-icon">
+          <svg width="28" height="28" viewBox="0 0 24 24" fill="none" stroke="url(#brandGrad)" stroke-width="2"
+            stroke-linecap="round" stroke-linejoin="round">
+            <defs>
+              <linearGradient id="brandGrad" x1="0%" y1="0%" x2="100%" y2="100%">
+                <stop offset="0%" stop-color="#a78bfa" />
+                <stop offset="100%" stop-color="#6ee7b7" />
+              </linearGradient>
+            </defs>
+            <path d="M22 10v6M2 10l10-5 10 5-10 5z" />
+            <path d="M6 12v5c0 1.66 3.58 3 8 3s8-1.34 8-3v-5" />
+          </svg>
+        </div>
+        <span class="brand-name">Krea<span class="brand-accent">Hub</span></span>
+      </div>
+
+      <nav class="sidebar-nav" id="sidebarNav">
+        <!-- Dynamically rendered by main.js based on active role -->
+      </nav>
+
+      <div class="sidebar-footer" id="sidebarFooter">
+        <!-- Dynamically rendered user card + role switcher -->
+      </div>
+    </aside>
+
+    <!-- Mobile header -->
+    <header class="topbar" id="topbar">
+      <button class="menu-toggle" id="menuToggle" aria-label="Toggle menu">
+        <span></span><span></span><span></span>
+      </button>
+      <div class="topbar-brand">Krea<span class="brand-accent">Hub</span></div>
+      <div class="topbar-actions">
+        <button class="icon-btn notif-btn" id="notifBtn" aria-label="Notifications">
+          <span id="icon-bell"></span>
+          <span class="notif-dot"></span>
+        </button>
+      </div>
+    </header>
+
+    <!-- Main content -->
+    <main class="main-content" id="mainContent">
+      <!-- Pages will be injected here -->
+    </main>
+  </div>
+
+  <!-- Overlay for mobile sidebar -->
+  <div class="sidebar-overlay" id="sidebarOverlay"></div>
+
+  <!-- Toast container -->
+  <div class="toast-container" id="toastContainer"></div>
+
+  <script type="module" src="/src/main.js"></script>
+</body>
+
+</html>
