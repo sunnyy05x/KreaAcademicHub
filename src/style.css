@@ -174,29 +174,48 @@ ol {
   margin-bottom: var(--space-xl);
 }
 
-.brand-icon {
-  width: 40px;
-  height: 40px;
-  background: rgba(167, 139, 250, 0.1);
-  border-radius: var(--radius-md);
+.brand-logo-container {
+  perspective: 1000px;
+  width: 140px;
+  /* Adjust based on your logo's aspect ratio */
   display: flex;
   align-items: center;
-  justify-content: center;
-  border: 1px solid var(--border-glass);
+  justify-content: flex-start;
 }
 
-.brand-name {
-  font-family: var(--font-heading);
-  font-size: 1.35rem;
-  font-weight: 700;
-  letter-spacing: -0.5px;
+.topbar-logo {
+  width: 100px;
+  /* Smaller in topbar */
 }
 
-.brand-accent {
-  background: var(--grad-primary);
-  -webkit-background-clip: text;
-  -webkit-text-fill-color: transparent;
-  background-clip: text;
+.brand-logo-img {
+  width: 100%;
+  height: auto;
+  transform-style: preserve-3d;
+  animation: float3d 5s ease-in-out infinite;
+  filter: drop-shadow(0 4px 12px rgba(99, 102, 241, 0.3));
+}
+
+@keyframes float3d {
+  0% {
+    transform: translateY(0px) rotateX(0deg) rotateY(0deg) scale(1);
+  }
+
+  25% {
+    transform: translateY(-4px) rotateX(5deg) rotateY(8deg) scale(1.02);
+  }
+
+  50% {
+    transform: translateY(0px) rotateX(0deg) rotateY(15deg) scale(1.05);
+  }
+
+  75% {
+    transform: translateY(4px) rotateX(-5deg) rotateY(8deg) scale(1.02);
+  }
+
+  100% {
+    transform: translateY(0px) rotateX(0deg) rotateY(0deg) scale(1);
+  }
 }
 
 /* Nav items */

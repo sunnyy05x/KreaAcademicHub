@@ -22,20 +22,11 @@
     <!-- Sidebar -->
     <aside class="sidebar" id="sidebar">
       <div class="sidebar-brand">
-        <div class="brand-icon">
-          <svg width="28" height="28" viewBox="0 0 24 24" fill="none" stroke="url(#brandGrad)" stroke-width="2"
-            stroke-linecap="round" stroke-linejoin="round">
-            <defs>
-              <linearGradient id="brandGrad" x1="0%" y1="0%" x2="100%" y2="100%">
-                <stop offset="0%" stop-color="#a78bfa" />
-                <stop offset="100%" stop-color="#6ee7b7" />
-              </linearGradient>
-            </defs>
-            <path d="M22 10v6M2 10l10-5 10 5-10 5z" />
-            <path d="M6 12v5c0 1.66 3.58 3 8 3s8-1.34 8-3v-5" />
-          </svg>
+        <div class="brand-logo-container">
+          <!-- The src point to public/krea-logo.png, please save the attached logo here -->
+          <img src="/krea-logo.png" alt="Krea Logo" class="brand-logo-img"
+            onerror="this.src='https://upload.wikimedia.org/wikipedia/en/9/9f/Krea_University_logo.svg'">
         </div>
-        <span class="brand-name">Krea<span class="brand-accent">Hub</span></span>
       </div>
 
       <nav class="sidebar-nav" id="sidebarNav">
@@ -52,7 +43,12 @@
       <button class="menu-toggle" id="menuToggle" aria-label="Toggle menu">
         <span></span><span></span><span></span>
       </button>
-      <div class="topbar-brand">Krea<span class="brand-accent">Hub</span></div>
+      <div class="topbar-brand">
+        <div class="brand-logo-container topbar-logo">
+          <img src="/krea-logo.png" alt="Krea Logo" class="brand-logo-img"
+            onerror="this.src='https://upload.wikimedia.org/wikipedia/en/9/9f/Krea_University_logo.svg'">
+        </div>
+      </div>
       <div class="topbar-actions">
         <button class="icon-btn notif-btn" id="notifBtn" aria-label="Notifications">
           <span id="icon-bell"></span>
