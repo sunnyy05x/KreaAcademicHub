@@ -1,9 +1,9 @@
 // ===== KREA HUB — MAIN ENTRY & ROUTER =====
-// Role-based SPA with dynamic sidebar navigation
+// Role-based SPA with dynamic sidebar navigation & auth gate
 
 import './style.css';
 import { icons } from './icons.js';
-import { ROLES, activeRole, setActiveRole, getActiveUser, userProfiles } from './data.js';
+import { ROLES, activeRole, setActiveRole, getActiveUser, userProfiles, isLoggedIn, logout } from './data.js';
 import { renderDashboard } from './pages/dashboard.js';
 import { renderScheduler, initScheduler } from './pages/scheduler.js';
 import { renderHelpDesk, initHelpDesk } from './pages/helpdesk.js';
@@ -11,6 +11,7 @@ import { renderPeerNetwork, initPeerNetwork } from './pages/peernetwork.js';
 import { renderFaculty, initFaculty } from './pages/faculty.js';
 import { renderTutor, initTutor } from './pages/tutor.js';
 import { renderTA, initTA } from './pages/ta.js';
+import { renderLogin, initLogin } from './pages/login.js';
 
 // ---- Page Registry ----
 const pages = {
@@ -88,6 +89,9 @@ function renderSidebar() {
         </div>
       `).join('')}
     </div>
+    <button class="btn btn-ghost btn-sm logout-btn" id="logoutBtn">
+      ${icons.logOut || '<svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M9 21H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h4"/><polyline points="16 17 21 12 16 7"/><line x1="21" y1="12" x2="9" y2="12"/></svg>'} Sign Out
+    </button>
   `;
 
   // Re-bind nav click handlers
@@ -114,6 +118,12 @@ function renderSidebar() {
       window.location.hash = defaultPage;
       navigate(defaultPage);
     });
+  });
+
+  // Logout button
+  document.getElementById('logoutBtn').addEventListener('click', () => {
+    logout();
+    showLogin();
   });
 
   // Update active state for current route
@@ -169,11 +179,42 @@ function closeSidebar() {
   document.getElementById('sidebarOverlay').classList.remove('visible');
 }
 
-// ---- Init ----
-function init() {
+// ---- Login / App Toggle ----
+function showLogin() {
+  // Hide the app shell
+  document.getElementById('app').style.display = 'none';
+
+  // Create login overlay if not already present
+  let loginRoot = document.getElementById('loginRoot');
+  if (!loginRoot) {
+    loginRoot = document.createElement('div');
+    loginRoot.id = 'loginRoot';
+    document.body.appendChild(loginRoot);
+  }
+  loginRoot.innerHTML = renderLogin();
+  initLogin((role) => {
+    // On successful login
+    showApp();
+  });
+}
+
+function showApp() {
+  // Remove login overlay
+  const loginRoot = document.getElementById('loginRoot');
+  if (loginRoot) loginRoot.innerHTML = '';
+
+  // Show the app shell
+  document.getElementById('app').style.display = '';
+
   // Render the dynamic sidebar
   renderSidebar();
 
+  // Initial route
+  navigate(getRoute());
+}
+
+// ---- Init ----
+function init() {
   // Mobile menu toggle
   document.getElementById('menuToggle').addEventListener('click', () => {
     const sidebar = document.getElementById('sidebar');
@@ -185,10 +226,16 @@ function init() {
   document.getElementById('sidebarOverlay').addEventListener('click', closeSidebar);
 
   // Hash change routing
-  window.addEventListener('hashchange', () => navigate(getRoute()));
+  window.addEventListener('hashchange', () => {
+    if (isLoggedIn()) navigate(getRoute());
+  });
 
-  // Initial route
-  navigate(getRoute());
+  // Auth gate: show login or app
+  if (isLoggedIn()) {
+    showApp();
+  } else {
+    showLogin();
+  }
 }
 
 // Boot

@@ -48,9 +48,60 @@ export const userProfiles = {
     },
 };
 
+// ---- Authentication ----
+// Students: @krea.ac.in  |  Faculty / TA / Tutors: @krea.edu.in
+const ALLOWED_DOMAINS = ['krea.ac.in', 'krea.edu.in'];
+
+export function isLoggedIn() {
+    return localStorage.getItem('kreaHub_loggedIn') === 'true';
+}
+
+export function getLoggedInUser() {
+    const data = localStorage.getItem('kreaHub_user');
+    return data ? JSON.parse(data) : null;
+}
+
+export function login(email, password) {
+    const domain = email.split('@')[1]?.toLowerCase();
+    if (!domain || !ALLOWED_DOMAINS.includes(domain)) {
+        return { success: false, error: 'Only @krea.ac.in (students) and @krea.edu.in (faculty/TA) accounts are allowed.' };
+    }
+    if (!password || password.length < 1) {
+        return { success: false, error: 'Please enter your password.' };
+    }
+
+    // Determine role from domain
+    let detectedRole = 'student';
+    if (domain === 'krea.edu.in') {
+        // Check if the email matches any known faculty/TA/tutor profile
+        const lowerEmail = email.toLowerCase();
+        if (userProfiles.faculty.email.toLowerCase() === lowerEmail) detectedRole = 'faculty';
+        else if (userProfiles.ta.email.toLowerCase() === lowerEmail) detectedRole = 'ta';
+        else if (userProfiles.tutor.email.toLowerCase() === lowerEmail) detectedRole = 'tutor';
+        else detectedRole = 'faculty'; // default for @krea.edu.in
+    }
+
+    const user = userProfiles[detectedRole];
+    const userData = { ...user, loginEmail: email };
+
+    localStorage.setItem('kreaHub_loggedIn', 'true');
+    localStorage.setItem('kreaHub_user', JSON.stringify(userData));
+    localStorage.setItem('kreaHub_role', detectedRole);
+
+    activeRole = detectedRole;
+    return { success: true, role: detectedRole, user: userData };
+}
+
+export function logout() {
+    localStorage.removeItem('kreaHub_loggedIn');
+    localStorage.removeItem('kreaHub_user');
+    localStorage.removeItem('kreaHub_role');
+    activeRole = 'student';
+}
+
 // Active role state — mutable via role switcher
-export let activeRole = 'student';
-export function setActiveRole(role) { activeRole = role; }
+export let activeRole = localStorage.getItem('kreaHub_role') || 'student';
+export function setActiveRole(role) { activeRole = role; localStorage.setItem('kreaHub_role', role); }
 export function getActiveUser() { return userProfiles[activeRole]; }
 
 export const currentUser = {
