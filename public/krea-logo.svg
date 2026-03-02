@@ -1,0 +1,22 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 400 120">
+  <!-- KREA logo recreation -->
+  <defs>
+    <clipPath id="circleClip">
+      <circle cx="60" cy="60" r="50" />
+    </clipPath>
+  </defs>
+  
+  <!-- "Woven" Icon -->
+  <g transform="translate(10, 10)">
+    <!-- Light blue bars -->
+    <path d="M20 10 L100 90 M40 0 L110 70 M60 -10 L120 50" stroke="#4fb9e1" stroke-width="8" stroke-linecap="round" />
+    <!-- Medium blue bars -->
+    <path d="M10 20 L90 100 M0 40 L70 110 M-10 60 L50 120" stroke="#1b75bc" stroke-width="8" stroke-linecap="round" />
+    <!-- Dark blue bars (interwoven) -->
+    <path d="M100 20 L20 100 M110 40 L40 110 M120 60 L60 120" stroke="#0054a6" stroke-width="8" stroke-linecap="round" />
+  </g>
+
+  <!-- Text -->
+  <text x="140" y="75" font-family="Outfit, sans-serif" font-weight="800" font-size="64" fill="#f1f5f9">KREA</text>
+  <text x="150" y="105" font-family="Inter, sans-serif" font-weight="400" font-size="24" fill="#94a3b8" letter-spacing="4">university</text>
+</svg>

@@ -196,29 +196,30 @@ ol {
   backface-visibility: hidden;
   -webkit-backface-visibility: hidden;
   will-change: transform;
-  animation: float3d 6s ease-in-out infinite;
-  filter: drop-shadow(0 4px 12px rgba(99, 102, 241, 0.3));
+  /* Smoother, slower animation to avoid jarring flickering */
+  animation: float3d 8s ease-in-out infinite;
+  filter: drop-shadow(0 6px 15px rgba(99, 102, 241, 0.4));
 }
 
 @keyframes float3d {
   0% {
-    transform: translateY(0px) rotateX(0deg) rotateY(0deg);
+    transform: translateZ(0) translateY(0) rotateX(0deg) rotateY(0deg);
   }
 
   25% {
-    transform: translateY(-3px) rotateX(4deg) rotateY(6deg);
+    transform: translateZ(20px) translateY(-4px) rotateX(3deg) rotateY(5deg);
   }
 
   50% {
-    transform: translateY(0px) rotateX(0deg) rotateY(10deg);
+    transform: translateZ(40px) translateY(0) rotateX(0deg) rotateY(10deg);
   }
 
   75% {
-    transform: translateY(3px) rotateX(-4deg) rotateY(6deg);
+    transform: translateZ(20px) translateY(4px) rotateX(-3deg) rotateY(5deg);
   }
 
   100% {
-    transform: translateY(0px) rotateX(0deg) rotateY(0deg);
+    transform: translateZ(0) translateY(0) rotateX(0deg) rotateY(0deg);
   }
 }
 
