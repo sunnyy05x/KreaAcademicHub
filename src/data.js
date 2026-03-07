@@ -4,22 +4,22 @@
 export const ROLES = {
     student: {
         label: 'Student',
-        pages: ['dashboard', 'scheduler', 'helpdesk', 'peernetwork'],
+        pages: ['dashboard', 'courses', 'scheduler', 'helpdesk', 'peernetwork'],
         defaultPage: 'dashboard',
     },
     faculty: {
         label: 'Faculty',
-        pages: ['dashboard', 'scheduler', 'helpdesk', 'faculty'],
+        pages: ['dashboard', 'courses', 'scheduler', 'helpdesk', 'faculty'],
         defaultPage: 'faculty',
     },
     ta: {
         label: 'Teaching Assistant',
-        pages: ['dashboard', 'helpdesk', 'scheduler', 'ta'],
+        pages: ['dashboard', 'courses', 'helpdesk', 'scheduler', 'ta'],
         defaultPage: 'ta',
     },
     tutor: {
         label: 'Peer Tutor',
-        pages: ['dashboard', 'helpdesk', 'peernetwork', 'tutor'],
+        pages: ['dashboard', 'courses', 'helpdesk', 'peernetwork', 'tutor'],
         defaultPage: 'tutor',
     },
 };
@@ -83,6 +83,35 @@ export function login(email, password) {
 
     const user = userProfiles[detectedRole];
     const userData = { ...user, loginEmail: email };
+
+    localStorage.setItem('kreaHub_loggedIn', 'true');
+    localStorage.setItem('kreaHub_user', JSON.stringify(userData));
+    localStorage.setItem('kreaHub_role', detectedRole);
+
+    activeRole = detectedRole;
+    return { success: true, role: detectedRole, user: userData };
+}
+
+export function loginWithGoogle(email, name) {
+    const domain = email.split('@')[1]?.toLowerCase();
+    if (!domain || !ALLOWED_DOMAINS.includes(domain)) {
+        return { success: false, error: 'Unauthorized Domain: Only @krea.ac.in (students) and @krea.edu.in (faculty/TA) accounts are allowed.' };
+    }
+
+    // Determine role from domain
+    let detectedRole = 'student';
+    if (domain === 'krea.edu.in') {
+        const lowerEmail = email.toLowerCase();
+        if (userProfiles.faculty.email.toLowerCase() === lowerEmail) detectedRole = 'faculty';
+        else if (userProfiles.ta.email.toLowerCase() === lowerEmail) detectedRole = 'ta';
+        else if (userProfiles.tutor.email.toLowerCase() === lowerEmail) detectedRole = 'tutor';
+        else detectedRole = 'faculty'; // default for @krea.edu.in
+    }
+
+    const user = userProfiles[detectedRole];
+    // Build user data — use Google profile name if available, else fallback to mock
+    const initials = name ? name.split(' ').map(w => w[0]).join('').toUpperCase().slice(0, 2) : user.initials;
+    const userData = { ...user, loginEmail: email, name: name || user.name, initials };
 
     localStorage.setItem('kreaHub_loggedIn', 'true');
     localStorage.setItem('kreaHub_user', JSON.stringify(userData));

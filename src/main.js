@@ -3,7 +3,7 @@
 
 import './style.css';
 import { icons } from './icons.js';
-import { ROLES, activeRole, setActiveRole, getActiveUser, userProfiles, isLoggedIn, logout } from './data.js';
+import { ROLES, activeRole, setActiveRole, getActiveUser, userProfiles, isLoggedIn, logout, getLoggedInUser } from './data.js';
 import { renderDashboard } from './pages/dashboard.js';
 import { renderScheduler, initScheduler } from './pages/scheduler.js';
 import { renderHelpDesk, initHelpDesk } from './pages/helpdesk.js';
@@ -12,6 +12,8 @@ import { renderFaculty, initFaculty } from './pages/faculty.js';
 import { renderTutor, initTutor } from './pages/tutor.js';
 import { renderTA, initTA } from './pages/ta.js';
 import { renderLogin, initLogin } from './pages/login.js';
+import { renderCourses, initCourses } from './pages/courses.js';
+import { setUserEmailCookie, clearUserEmailCookie } from './canvasService.js';
 
 // ---- Page Registry ----
 const pages = {
@@ -22,6 +24,7 @@ const pages = {
   faculty: { render: renderFaculty, init: initFaculty, label: 'Faculty Panel', icon: 'shield' },
   tutor: { render: renderTutor, init: initTutor, label: 'Tutor Panel', icon: 'award' },
   ta: { render: renderTA, init: initTA, label: 'TA Panel', icon: 'clipboard' },
+  courses: { render: renderCourses, init: initCourses, label: 'My Courses', icon: 'book' },
 };
 
 // ---- Role-specific page sets ----
@@ -122,6 +125,7 @@ function renderSidebar() {
 
   // Logout button
   document.getElementById('logoutBtn').addEventListener('click', () => {
+    clearUserEmailCookie();
     logout();
     showLogin();
   });
@@ -193,7 +197,11 @@ function showLogin() {
   }
   loginRoot.innerHTML = renderLogin();
   initLogin((role) => {
-    // On successful login
+    // On successful login — set email cookie for Canvas API auth
+    const user = getLoggedInUser();
+    if (user?.loginEmail || user?.email) {
+      setUserEmailCookie(user.loginEmail || user.email);
+    }
     showApp();
   });
 }

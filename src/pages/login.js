@@ -1,8 +1,26 @@
-// ===== KREA HUB — LOGIN PAGE =====
+// ===== KREA HUB — LOGIN PAGE (Google SSO) =====
 import { icons } from '../icons.js';
 
+// ⚠️ Replace this with your actual Google OAuth Client ID from Google Cloud Console
+const GOOGLE_CLIENT_ID = '386292949358-das6jhqmkadur6ugurai8mfilr9efuid.apps.googleusercontent.com';
+
+/**
+ * Decode a JWT ID token payload (base64url → JSON).
+ * This is safe for client-side use — Google's ID token is a standard JWT.
+ */
+function decodeJwtPayload(token) {
+  const base64Url = token.split('.')[1];
+  const base64 = base64Url.replace(/-/g, '+').replace(/_/g, '/');
+  const json = decodeURIComponent(
+    atob(base64).split('').map(c =>
+      '%' + ('00' + c.charCodeAt(0).toString(16)).slice(-2)
+    ).join('')
+  );
+  return JSON.parse(json);
+}
+
 export function renderLogin() {
-    return `
+  return `
     <div class="login-page">
       <div class="login-bg-shapes">
         <div class="login-shape shape-1"></div>
@@ -34,49 +52,32 @@ export function renderLogin() {
           </div>
         </div>
 
-        <!-- Right Panel — form -->
+        <!-- Right Panel — Google SSO -->
         <div class="login-form-panel">
           <div class="login-form-header">
-            <h1>Welcome Back</h1>
-            <p>Sign in with your Krea account</p>
+            <h1>Welcome to KreaHub</h1>
+            <p>Sign in with your official Krea University account</p>
           </div>
 
-          <form id="loginForm" class="login-form" autocomplete="on">
-            <div class="login-domain-badges">
-              <span class="badge badge-teal">Students: @krea.ac.in</span>
-              <span class="badge badge-purple">Faculty / TA: @krea.edu.in</span>
-            </div>
-
-            <div class="input-group">
-              <label for="loginEmail">Email Address</label>
-              <div class="input-with-icon">
-                <span class="input-icon">${icons.mail || `<svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M4 4h16c1.1 0 2 .9 2 2v12c0 1.1-.9 2-2 2H4c-1.1 0-2-.9-2-2V6c0-1.1.9-2 2-2z"/><polyline points="22,6 12,13 2,6"/></svg>`}</span>
-                <input type="email" id="loginEmail" class="input" placeholder="yourname@krea.ac.in" required autocomplete="email">
-              </div>
-            </div>
-
-            <div class="input-group">
-              <label for="loginPassword">Password</label>
-              <div class="input-with-icon">
-                <span class="input-icon">${icons.lock || `<svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="3" y="11" width="18" height="11" rx="2" ry="2"/><path d="M7 11V7a5 5 0 0 1 10 0v4"/></svg>`}</span>
-                <input type="password" id="loginPassword" class="input" placeholder="Enter your password" required autocomplete="current-password">
-              </div>
-            </div>
-
+          <div class="login-form" id="loginForm">
             <div class="login-error" id="loginError" style="display:none">
               <span class="login-error-icon">⚠️</span>
               <span id="loginErrorText"></span>
             </div>
 
-            <button type="submit" class="btn btn-primary btn-lg login-submit-btn" id="loginSubmitBtn">
-              Sign In
-            </button>
+            <div id="googleSsoBtnContainer" class="google-sso-container" style="display:flex; justify-content:center; width:100%; margin: 24px 0;"></div>
+
+            <div class="login-divider">
+              <span class="login-divider-line"></span>
+              <span class="login-divider-text">Krea accounts only</span>
+              <span class="login-divider-line"></span>
+            </div>
 
             <div class="login-footer-note">
               <p>Use your official Krea University email to sign in.</p>
-              <p class="login-footer-small">Students → <strong>@krea.ac.in</strong> &nbsp;|&nbsp; Faculty & TA → <strong>@krea.edu.in</strong></p>
+
             </div>
-          </form>
+          </div>
         </div>
       </div>
     </div>
@@ -84,61 +85,89 @@ export function renderLogin() {
 }
 
 export function initLogin(onLoginSuccess) {
-    const form = document.getElementById('loginForm');
-    const errorBox = document.getElementById('loginError');
-    const errorText = document.getElementById('loginErrorText');
-    const submitBtn = document.getElementById('loginSubmitBtn');
+  const errorBox = document.getElementById('loginError');
+  const errorText = document.getElementById('loginErrorText');
 
-    form.addEventListener('submit', (e) => {
-        e.preventDefault();
-        errorBox.style.display = 'none';
+  function showError(msg) {
+    errorBox.style.display = 'flex';
+    errorText.textContent = msg;
+  }
 
-        const email = document.getElementById('loginEmail').value.trim();
-        const password = document.getElementById('loginPassword').value;
+  function hideError() {
+    errorBox.style.display = 'none';
+  }
 
-        if (!email) {
-            showError('Please enter your email address.');
-            return;
+  /**
+   * Handle the Google credential response.
+   * Decodes the JWT, validates domain, and completes login.
+   */
+  function handleCredentialResponse(response) {
+    hideError();
+    try {
+      const payload = decodeJwtPayload(response.credential);
+      const email = payload.email;
+      const name = payload.name || '';
+      const hd = payload.hd; // hosted domain claim — present for Google Workspace accounts
+
+      // Domain validation: check the hosted domain claim and email domain
+      const emailDomain = email.split('@')[1]?.toLowerCase();
+      const allowedDomains = ['krea.ac.in', 'krea.edu.in'];
+
+      if (!allowedDomains.includes(emailDomain) && !allowedDomains.includes(hd)) {
+        showError('Unauthorized Domain: Only @krea.ac.in and @krea.edu.in accounts are allowed. Personal Gmail and other domains are not permitted.');
+        return;
+      }
+
+      // Use the data module to complete login
+      import('../data.js').then(({ loginWithGoogle }) => {
+        const result = loginWithGoogle(email, name);
+        if (result.success) {
+          onLoginSuccess(result.role);
+        } else {
+          showError(result.error);
         }
-        if (!password) {
-            showError('Please enter your password.');
-            return;
-        }
-
-        // Validate domain
-        const domain = email.split('@')[1]?.toLowerCase();
-        if (!domain || !['krea.ac.in', 'krea.edu.in'].includes(domain)) {
-            showError('Only @krea.ac.in (students) and @krea.edu.in (faculty/TA) accounts are allowed.');
-            return;
-        }
-
-        // Animate button
-        submitBtn.textContent = 'Signing in…';
-        submitBtn.disabled = true;
-
-        // Simulate brief auth delay for UX
-        setTimeout(() => {
-            // Import login dynamically to avoid circular deps
-            import('../data.js').then(({ login }) => {
-                const result = login(email, password);
-                if (result.success) {
-                    onLoginSuccess(result.role);
-                } else {
-                    showError(result.error);
-                    submitBtn.textContent = 'Sign In';
-                    submitBtn.disabled = false;
-                }
-            });
-        }, 600);
-    });
-
-    function showError(msg) {
-        errorBox.style.display = 'flex';
-        errorText.textContent = msg;
+      });
+    } catch (err) {
+      console.error('Google SSO error:', err);
+      showError('Authentication failed. Please try again.');
     }
+  }
 
-    // Focus the email field
-    setTimeout(() => {
-        document.getElementById('loginEmail')?.focus();
-    }, 100);
+  // Initialize Google Identity Services
+  function initGoogleSSO() {
+    if (typeof google !== 'undefined' && google.accounts) {
+      google.accounts.id.initialize({
+        client_id: GOOGLE_CLIENT_ID,
+        callback: handleCredentialResponse,
+        auto_select: false,
+        cancel_on_tap_outside: true,
+        // Restrict to Krea hosted domains
+        hosted_domain: 'krea.ac.in', // Primary hint — backup validation is in code
+      });
+
+      const btnContainer = document.getElementById('googleSsoBtnContainer');
+      if (btnContainer) {
+        google.accounts.id.renderButton(
+          btnContainer,
+          { theme: 'filled_black', size: 'large', text: 'signin_with', width: '320', shape: 'pill' }
+        );
+      }
+    }
+  }
+
+  // Initialize Google SSO when the page loads
+  // The GIS script may not be loaded yet, so we retry
+  if (typeof google !== 'undefined' && google.accounts) {
+    initGoogleSSO();
+  } else {
+    // Wait for the GIS script to load
+    const checkGoogle = setInterval(() => {
+      if (typeof google !== 'undefined' && google.accounts) {
+        clearInterval(checkGoogle);
+        initGoogleSSO();
+      }
+    }, 200);
+    // Stop checking after 10 seconds
+    setTimeout(() => clearInterval(checkGoogle), 10000);
+  }
 }
